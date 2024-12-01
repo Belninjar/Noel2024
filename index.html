@@ -50,9 +50,9 @@
 
         .climber {
             position: absolute;
-            bottom: 140px;
-            left:300px;
-            width: 90px;
+            bottom: 100px;
+            left:210px; 
+            width: 60px;
             z-index: 1; /* Le personnage au-dessus de la montagne mais derrière le premier plan */
             transition: transform 0.05s linear, bottom 0.05s linear;
         }
@@ -86,7 +86,7 @@
         let position = 0; // Logical position (0–25 intervals)
         let targetPosition = 0; // Target position based on clicks
         let pendingClicks = 0; // Number of pending clicks
-        const initialOffset = 140; // Initial pixel offset for the climber
+        const initialOffset = 100; // Initial pixel offset for the climber
         const climber = document.getElementById("climber");
         const progress = document.getElementById("progress");
         const stepSound = document.getElementById("step-sound");
@@ -101,11 +101,11 @@
                 position += Math.random() * (0.03 - 0.01) + 0.01; // Random increment for smooth movement
     
                 // Calculate the bottom offset based on logical position and initial offset
-                const offset = (position / 25) * 515*25.5/18.5 + initialOffset; 
+                const offset = (position / 25) * 345*24.5/18.5 + initialOffset; 
                 climber.style.bottom = `${offset}px`;
     
                 // Oscillation for natural climbing effect
-                climber.style.left = `calc(300px + ${position * 2*25.5/18.5}% - ${Math.sin(position * 0.5) * 5}px)`;
+                climber.style.left = `calc(210px + ${position * 2*24.5/18.5}% - ${Math.sin(position * 0.5) * 5}px)`;
                 climber.style.transform = `rotate(${Math.sin(position * 2) * 5}deg)`; // Oscillation in angle
     
                 // Update the progress display
