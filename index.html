@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du Tyrolien</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: url('Background.png') no-repeat center center;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Positionnement et gestion des couches */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Arrière-plan le plus éloigné */
+        }
+
+        .mountain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* Montagne au-dessus du fond */
+        }
+
+        .foreground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4; /* Premier plan devant la montagne */
+        }
+
+        .climber {
+            position: absolute;
+            bottom: 140px;
+            left:300px;
+            width: 90px;
+            z-index: 1; /* Le personnage au-dessus de la montagne mais derrière le premier plan */
+            transition: transform 0.05s linear, bottom 0.05s linear;
+        }
+
+        .progress {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            z-index: 5; /* Toujours visible au-dessus des autres éléments */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <img src="Background.png" alt="Background" class="background">
+        <img src="2.png" alt="Montagne" class="mountain">
+        <img src="Front.png" alt="Premier plan" class="foreground">
+        <img src="1.png" alt="Personnage" class="climber" id="climber">
+        <audio id="step-sound" src="son.mp3" loop></audio>
+        <audio id="fall-sound" src="chute.mp3" loop></audio>
+        <!-- Ensure the progress element is included -->
+        <div class="progress" id="progress">Position : 0</div>
+    </div>
+    
+    <script>
+        let position = 0; // Logical position (0–25 intervals)
+        let targetPosition = 0; // Target position based on clicks
+        let pendingClicks = 0; // Number of pending clicks
+        const initialOffset = 140; // Initial pixel offset for the climber
+        const climber = document.getElementById("climber");
+        const progress = document.getElementById("progress");
+        const stepSound = document.getElementById("step-sound");
+        let clickTimeout = null; // Timer for 2-second delay after clicks
+        let isMoving = false; // Indicates whether the climber is moving
+        let hasFallen = false; // Flag to track if the climber has already fallen
+
+        // Function to move the climber
+        function moveClimber() {
+            if (position < targetPosition && position < 25) {
+                // Increment position logically
+                position += Math.random() * (0.03 - 0.01) + 0.01; // Random increment for smooth movement
+    
+                // Calculate the bottom offset based on logical position and initial offset
+                const offset = (position / 25) * 515*25.5/18.5 + initialOffset; 
+                climber.style.bottom = `${offset}px`;
+    
+                // Oscillation for natural climbing effect
+                climber.style.left = `calc(300px + ${position * 2*25.5/18.5}% - ${Math.sin(position * 0.5) * 5}px)`;
+                climber.style.transform = `rotate(${Math.sin(position * 2) * 5}deg)`; // Oscillation in angle
+    
+                // Update the progress display
+                progress.innerText = `Position : ${Math.floor(position)}`;
+    
+                // Play the sound if not already playing
+                if (stepSound.paused) {
+                    stepSound.play();
+                }
+    
+                // Continue moving
+                requestAnimationFrame(moveClimber);
+            } else {
+                // Stop the sound if movement is finished
+                stepSound.pause();
+    
+
+if (position >= 25 && !hasFallen) {
+    hasFallen = true; // Set the flag to true to ensure the sound plays only once
+
+    // Handle falling animation when reaching the top
+    climber.style.transition = "transform 2s, bottom 2s";
+    climber.style.transform = "rotate(90deg)";
+    climber.style.bottom = "-200px";
+
+    const progress = document.getElementById("progress");
+    const fallSound = document.getElementById("fall-sound");
+
+    fallSound.play(); // Play the falling sound only once
+
+    setTimeout(() => {
+        climber.style.display = "none";
+    }, 2000);
+}
+
+    
+                isMoving = false; // Stop movement
+            }
+        }
+    
+        // Handle clicks to add steps
+        document.body.addEventListener("click", () => {
+            pendingClicks++; // Increment pending clicks
+            if (clickTimeout) clearTimeout(clickTimeout); // Reset the delay
+    
+            // Start a 2-second timer to batch clicks
+            clickTimeout = setTimeout(() => {
+                targetPosition += pendingClicks; // Add pending clicks to the target
+                targetPosition = Math.min(targetPosition, 25); // Ensure target doesn't exceed 25
+                pendingClicks = 0; // Reset pending clicks
+    
+                if (!isMoving) {
+                    // Start movement if not already moving
+                    isMoving = true;
+                    requestAnimationFrame(moveClimber);
+                }
+            }, 2000);
+        });
+    </script>
+    
+</body>
+</html>
